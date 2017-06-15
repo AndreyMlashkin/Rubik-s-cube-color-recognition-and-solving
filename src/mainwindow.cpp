@@ -115,10 +115,11 @@ void MainWindow::showProcessedImages(const QFileInfo &_file)
     assert( image != 0 );
 
     // создаём картинки
-    m_slices.original_rgb = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 3 );
-    m_slices.r_plane = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
-    m_slices.g_plane = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
-    m_slices.b_plane = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
+    fillRbgSlices(image);
+//    m_slices.original_rgb = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 3 );
+//    m_slices.r_plane = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
+//    m_slices.g_plane = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
+//    m_slices.b_plane = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
     r_range = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
     g_range = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
     b_range = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
@@ -204,4 +205,12 @@ void MainWindow::showProcessedImages(const QFileInfo &_file)
             break;
         }
     }
+}
+
+void MainWindow::fillRbgSlices(IplImage *source_image)
+{
+    m_slices.original_rgb = cvCreateImage( cvGetSize(source_image), IPL_DEPTH_8U, 3 );
+    m_slices.r_plane      = cvCreateImage( cvGetSize(source_image), IPL_DEPTH_8U, 1 );
+    m_slices.g_plane      = cvCreateImage( cvGetSize(source_image), IPL_DEPTH_8U, 1 );
+    m_slices.b_plane      = cvCreateImage( cvGetSize(source_image), IPL_DEPTH_8U, 1 );
 }

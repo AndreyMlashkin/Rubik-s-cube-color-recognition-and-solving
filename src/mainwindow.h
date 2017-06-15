@@ -21,6 +21,8 @@ public:
     void showFullScreenImage(const QFileInfo& _file);
     void showProcessedImages(const QFileInfo& _file);
 
+    void fillRbgSlices(IplImage* source_image);
+
     struct Slices
     {
         IplImage* original_rgb = nullptr;
