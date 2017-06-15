@@ -10,11 +10,6 @@
 
 using namespace cv;
 
-// для хранения каналов RGB
-IplImage* rgb = 0;
-IplImage* r_plane = 0;
-IplImage* g_plane = 0;
-IplImage* b_plane = 0;
 // для хранения каналов RGB после преобразования
 IplImage* r_range = 0;
 IplImage* g_range = 0;
@@ -22,46 +17,46 @@ IplImage* b_range = 0;
 // для хранения суммарной картинки
 IplImage* rgb_and = 0;
 
-int Rmin = 0;
-int Rmax = 256;
+int Rmin = 1;
+int Rmax = 255;
 
-int Gmin = 0;
-int Gmax = 256;
+int Gmin = 1;
+int Gmax = 255;
 
-int Bmin = 0;
-int Bmax = 256;
+int Bmin = 1;
+int Bmax = 255;
 
-int RGBmax = 256;
+int RGBmax = 255;
 
-void myTrackbarRmin(int pos) {
-        Rmin = pos;
-        cvInRangeS(r_plane, cvScalar(Rmin), cvScalar(Rmax), r_range);
-}
+//void myTrackbarRmin(int pos) {
+//        Rmin = pos;
+//        cvInRangeS(m_slices.r_plane, cvScalar(Rmin), cvScalar(Rmax), r_range);
+//}
 
-void myTrackbarRmax(int pos) {
-        Rmax = pos;
-        cvInRangeS(r_plane, cvScalar(Rmin), cvScalar(Rmax), r_range);
-}
+//void myTrackbarRmax(int pos) {
+//        Rmax = pos;
+//        cvInRangeS(m_slices.r_plane, cvScalar(Rmin), cvScalar(Rmax), r_range);
+//}
 
-void myTrackbarGmin(int pos) {
-        Gmin = pos;
-        cvInRangeS(g_plane, cvScalar(Gmin), cvScalar(Gmax), g_range);
-}
+//void myTrackbarGmin(int pos) {
+//        Gmin = pos;
+//        cvInRangeS(m_slices.g_plane, cvScalar(Gmin), cvScalar(Gmax), g_range);
+//}
 
-void myTrackbarGmax(int pos) {
-        Gmax = pos;
-        cvInRangeS(g_plane, cvScalar(Gmin), cvScalar(Gmax), g_range);
-}
+//void myTrackbarGmax(int pos) {
+//        Gmax = pos;
+//        cvInRangeS(m_slices.g_plane, cvScalar(Gmin), cvScalar(Gmax), g_range);
+//}
 
-void myTrackbarBmin(int pos) {
-        Bmin = pos;
-        cvInRangeS(b_plane, cvScalar(Bmin), cvScalar(Bmax), b_range);
-}
+//void myTrackbarBmin(int pos) {
+//        Bmin = pos;
+//        cvInRangeS(m_slices.b_plane, cvScalar(Bmin), cvScalar(Bmax), b_range);
+//}
 
-void myTrackbarBmax(int pos) {
-        Bmax = pos;
-        cvInRangeS(b_plane, cvScalar(Bmin), cvScalar(Bmax), b_range);
-}
+//void myTrackbarBmax(int pos) {
+//        Bmax = pos;
+//        cvInRangeS(m_slices.b_plane, cvScalar(Bmin), cvScalar(Bmax), b_range);
+//}
 
 
 
@@ -120,18 +115,18 @@ void MainWindow::showProcessedImages(const QFileInfo &_file)
     assert( image != 0 );
 
     // создаём картинки
-    rgb = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 3 );
-    r_plane = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
-    g_plane = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
-    b_plane = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
+    m_slices.original_rgb = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 3 );
+    m_slices.r_plane = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
+    m_slices.g_plane = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
+    m_slices.b_plane = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
     r_range = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
     g_range = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
     b_range = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
     rgb_and = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
     //  копируем
-    cvCopy(image, rgb);
+    cvCopy(image, m_slices.original_rgb);
     // разбиваем на отельные каналы
-    cvSplit( rgb, b_plane, g_plane, r_plane, 0 );
+    cvSplit( m_slices.original_rgb, m_slices.b_plane, m_slices.g_plane, m_slices.r_plane, 0 );
 
     //
     // определяем минимальное и максимальное значение
@@ -139,15 +134,15 @@ void MainWindow::showProcessedImages(const QFileInfo &_file)
     double framemin=0;
     double framemax=0;
 
-    cvMinMaxLoc(r_plane, &framemin, &framemax);
+    cvMinMaxLoc(m_slices.r_plane, &framemin, &framemax);
     printf("[R] %f x %f\n", framemin, framemax );
     Rmin = framemin;
     Rmax = framemax;
-    cvMinMaxLoc(g_plane, &framemin, &framemax);
+    cvMinMaxLoc(m_slices.g_plane, &framemin, &framemax);
     printf("[G] %f x %f\n", framemin, framemax );
     Gmin = framemin;
     Gmax = framemax;
-    cvMinMaxLoc(b_plane, &framemin, &framemax);
+    cvMinMaxLoc(m_slices.b_plane, &framemin, &framemax);
     printf("[B] %f x %f\n", framemin, framemax );
     Bmin = framemin;
     Bmax = framemax;
@@ -162,16 +157,14 @@ void MainWindow::showProcessedImages(const QFileInfo &_file)
     cvNamedWindow("B range",CV_WINDOW_AUTOSIZE);
     cvNamedWindow("rgb and",CV_WINDOW_AUTOSIZE);
 
-    cvCreateTrackbar("Rmin", "R range", &Rmin, RGBmax, myTrackbarRmin);
-    cvCreateTrackbar("Rmax", "R range", &Rmax, RGBmax, myTrackbarRmax);
-    cvCreateTrackbar("Gmin", "G range", &Gmin, RGBmax, myTrackbarGmin);
-    cvCreateTrackbar("Gmax", "G range", &Gmax, RGBmax, myTrackbarGmax);
-    cvCreateTrackbar("Bmin", "B range", &Gmin, RGBmax, myTrackbarBmin);
-    cvCreateTrackbar("Bmax", "B range", &Gmax, RGBmax, myTrackbarBmax);
+//    cvCreateTrackbar("Rmin", "R range", &Rmin, RGBmax, myTrackbarRmin);
+//    cvCreateTrackbar("Rmax", "R range", &Rmax, RGBmax, myTrackbarRmax);
+//    cvCreateTrackbar("Gmin", "G range", &Gmin, RGBmax, myTrackbarGmin);
+//    cvCreateTrackbar("Gmax", "G range", &Gmax, RGBmax, myTrackbarGmax);
+//    cvCreateTrackbar("Bmin", "B range", &Gmin, RGBmax, myTrackbarBmin);
+//    cvCreateTrackbar("Bmax", "B range", &Gmax, RGBmax, myTrackbarBmax);
 
-    //
     // разместим окна по рабочему столу
-    //
     if(image->width <1920/4 && image->height<1080/2)
     {
         cvMoveWindow("original", 0, 0);
@@ -186,14 +179,13 @@ void MainWindow::showProcessedImages(const QFileInfo &_file)
 
     while(true)
     {
-
         // показываем картинку
         cvShowImage("original",image);
 
         // показываем слои
-        cvShowImage( "R", r_plane );
-        cvShowImage( "G", g_plane );
-        cvShowImage( "B", b_plane );
+        cvShowImage( "R", m_slices.r_plane );
+        cvShowImage( "G", m_slices.g_plane );
+        cvShowImage( "B", m_slices.b_plane );
 
         // показываем результат порогового преобразования
         cvShowImage( "R range", r_range );
