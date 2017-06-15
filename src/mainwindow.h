@@ -21,7 +21,9 @@ public:
     void showFullScreenImage(const QFileInfo& _file);
     void showProcessedImages(const QFileInfo& _file);
 
+
     void fillRbgSlices(IplImage* source_image);
+    void showSlices();
 
     struct Slices
     {
@@ -34,6 +36,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    QSize m_screenSize;
 };
 
 #endif // MAINWINDOW_H

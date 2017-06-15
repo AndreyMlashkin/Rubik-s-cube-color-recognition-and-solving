@@ -65,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    m_screenSize = QApplication::desktop()->screenGeometry().size();
 
     QDir dir = QDir::current();
     Q_ASSERT(dir.cdUp());
@@ -116,18 +117,10 @@ void MainWindow::showProcessedImages(const QFileInfo &_file)
 
     // создаём картинки
     fillRbgSlices(image);
-//    m_slices.original_rgb = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 3 );
-//    m_slices.r_plane = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
-//    m_slices.g_plane = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
-//    m_slices.b_plane = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
     r_range = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
     g_range = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
     b_range = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
     rgb_and = cvCreateImage( cvGetSize(image), IPL_DEPTH_8U, 1 );
-    //  копируем
-    cvCopy(image, m_slices.original_rgb);
-    // разбиваем на отельные каналы
-    cvSplit( m_slices.original_rgb, m_slices.b_plane, m_slices.g_plane, m_slices.r_plane, 0 );
 
     //
     // определяем минимальное и максимальное значение
@@ -149,10 +142,10 @@ void MainWindow::showProcessedImages(const QFileInfo &_file)
     Bmax = framemax;
 
     // окна для отображения картинки
-    cvNamedWindow("original",CV_WINDOW_AUTOSIZE);
-    cvNamedWindow("R",CV_WINDOW_AUTOSIZE);
-    cvNamedWindow("G",CV_WINDOW_AUTOSIZE);
-    cvNamedWindow("B",CV_WINDOW_AUTOSIZE);
+//    cvNamedWindow("original",CV_WINDOW_AUTOSIZE);
+//    cvNamedWindow("R",CV_WINDOW_AUTOSIZE);
+//    cvNamedWindow("G",CV_WINDOW_AUTOSIZE);
+//    cvNamedWindow("B",CV_WINDOW_AUTOSIZE);
     cvNamedWindow("R range",CV_WINDOW_AUTOSIZE);
     cvNamedWindow("G range",CV_WINDOW_AUTOSIZE);
     cvNamedWindow("B range",CV_WINDOW_AUTOSIZE);
@@ -168,10 +161,10 @@ void MainWindow::showProcessedImages(const QFileInfo &_file)
     // разместим окна по рабочему столу
     if(image->width <1920/4 && image->height<1080/2)
     {
-        cvMoveWindow("original", 0, 0);
-        cvMoveWindow("R", image->width+10, 0);
-        cvMoveWindow("G", (image->width+10)*2, 0);
-        cvMoveWindow("B", (image->width+10)*3, 0);
+//        cvMoveWindow("original", 0, 0);
+//        cvMoveWindow("R", image->width+10, 0);
+//        cvMoveWindow("G", (image->width+10)*2, 0);
+//        cvMoveWindow("B", (image->width+10)*3, 0);
         cvMoveWindow("rgb and", 0, image->height+30);
         cvMoveWindow("R range", image->width+10, image->height+30);
         cvMoveWindow("G range", (image->width+10)*2, image->height+30);
@@ -213,4 +206,34 @@ void MainWindow::fillRbgSlices(IplImage *source_image)
     m_slices.r_plane      = cvCreateImage( cvGetSize(source_image), IPL_DEPTH_8U, 1 );
     m_slices.g_plane      = cvCreateImage( cvGetSize(source_image), IPL_DEPTH_8U, 1 );
     m_slices.b_plane      = cvCreateImage( cvGetSize(source_image), IPL_DEPTH_8U, 1 );
+    //  копируем
+    cvCopy(source_image, m_slices.original_rgb);
+    // разбиваем на отельные каналы
+    cvSplit( m_slices.original_rgb, m_slices.b_plane, m_slices.g_plane, m_slices.r_plane, 0 );
+
+}
+
+void MainWindow::showSlices()
+{
+    const int pic_count = 4;
+    const int width = m_screenSize.width() / 4;
+    const int height = m_screenSize.height() / 2;
+
+    // окна для отображения картинки
+    cvNamedWindow("original",CV_WINDOW_AUTOSIZE);
+    cvNamedWindow("R",CV_WINDOW_AUTOSIZE);
+    cvNamedWindow("G",CV_WINDOW_AUTOSIZE);
+    cvNamedWindow("B",CV_WINDOW_AUTOSIZE);
+
+    cvMoveWindow("original", 0,       0);
+    cvMoveWindow("R",        width,   0);
+    cvMoveWindow("G",        width*2, 0);
+    cvMoveWindow("B",        width*3, 0);
+
+    // показываем картинку
+    cvShowImage("original",m_slices.original_rgb);
+    // показываем слои
+    cvShowImage( "R", m_slices.r_plane );
+    cvShowImage( "G", m_slices.g_plane );
+    cvShowImage( "B", m_slices.b_plane );
 }
