@@ -21,7 +21,7 @@ public:
     void showFullScreenImage(const QFileInfo& _file);
     void showProcessedImages(const QFileInfo& _file);
 
-
+    void fillRbgSlices(const QFileInfo& _file);
     void fillRbgSlices(IplImage* source_image);
     void showSlices();
 

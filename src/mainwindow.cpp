@@ -76,7 +76,9 @@ MainWindow::MainWindow(QWidget *parent) :
     for(const QFileInfo& picturesFile : picturesFiles)
     {
         //showFullScreenImage(picturesFile);
-        showProcessedImages(picturesFile);
+        //showProcessedImages(picturesFile);
+        fillRbgSlices(picturesFile);
+        showSlices();
     }
 }
 
@@ -200,6 +202,15 @@ void MainWindow::showProcessedImages(const QFileInfo &_file)
     }
 }
 
+void MainWindow::fillRbgSlices(const QFileInfo &_file)
+{
+    std::string tmp_filename = _file.absoluteFilePath().toStdString();
+    const char* filename = tmp_filename.c_str();
+
+    IplImage* image = cvLoadImage(filename,1);
+    fillRbgSlices(image);
+}
+
 void MainWindow::fillRbgSlices(IplImage *source_image)
 {
     m_slices.original_rgb = cvCreateImage( cvGetSize(source_image), IPL_DEPTH_8U, 3 );
@@ -219,21 +230,22 @@ void MainWindow::showSlices()
     const int width = m_screenSize.width() / 4;
     const int height = m_screenSize.height() / 2;
 
-    // окна для отображения картинки
-    cvNamedWindow("original",CV_WINDOW_AUTOSIZE);
-    cvNamedWindow("R",CV_WINDOW_AUTOSIZE);
-    cvNamedWindow("G",CV_WINDOW_AUTOSIZE);
-    cvNamedWindow("B",CV_WINDOW_AUTOSIZE);
+    QStringList pic_names {"original", "R", "G", "B"};
 
-    cvMoveWindow("original", 0,       0);
-    cvMoveWindow("R",        width,   0);
-    cvMoveWindow("G",        width*2, 0);
-    cvMoveWindow("B",        width*3, 0);
+    for(const QString& name : pic_names)
+        cvNamedWindow(name.toStdString().c_str(), WINDOW_NORMAL);
 
-    // показываем картинку
+    for(int i = 0; i < pic_names.size(); ++i)
+    {
+        const QString& name = pic_names.at(i);
+        cvMoveWindow(name.toStdString().c_str(), i * width, 0);
+    }
+
     cvShowImage("original",m_slices.original_rgb);
-    // показываем слои
-    cvShowImage( "R", m_slices.r_plane );
-    cvShowImage( "G", m_slices.g_plane );
-    cvShowImage( "B", m_slices.b_plane );
+    cvShowImage( "R",      m_slices.r_plane );
+    cvShowImage( "G",      m_slices.g_plane );
+    cvShowImage( "B",      m_slices.b_plane );
+
+    for(const QString& name : pic_names)
+        cvResizeWindow(name.toStdString().c_str(), width, height);
 }
