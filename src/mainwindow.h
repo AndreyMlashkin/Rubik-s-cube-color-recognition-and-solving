@@ -17,6 +17,7 @@ public:
     ~MainWindow();
 
     void showFullScreenImage(const QFileInfo& _file);
+    void showProcessedImages(const QFileInfo& _file);
 
 private:
     Ui::MainWindow *ui;
