@@ -28,12 +28,16 @@ public:
 private:
     struct Slices
     {
+        Slices();
+        static const std::list<const char *> &slices_names();
+        const std::list<IplImage*> slices();
+
         IplImage* original_rgb = nullptr;
         // rbg channels:
         IplImage* r_plane = nullptr;
         IplImage* g_plane = nullptr;
         IplImage* b_plane = nullptr;
-        static const std::list<const char *> &slices_names();
+
     } m_slices;
 
 private:
