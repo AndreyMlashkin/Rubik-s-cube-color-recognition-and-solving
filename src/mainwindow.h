@@ -23,12 +23,17 @@ public:
 
     void fillRbgSlices(const QFileInfo& _file);
     void fillRbgSlices(IplImage* source_image);
+    void fillEdges();
+
     void showSlices();
 
 private:
     struct Slices
     {
         Slices();
+        ~Slices();
+        void clear();
+
         static const std::list<const char *> &slices_names();
         const std::list<IplImage*> slices();
 
@@ -38,6 +43,7 @@ private:
         IplImage* g_plane = nullptr;
         IplImage* b_plane = nullptr;
 
+        IplImage* edges = nullptr;
     } m_slices;
 
 private:
