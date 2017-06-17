@@ -25,6 +25,7 @@ public:
     void fillRbgSlices(IplImage* source_image);
     void showSlices();
 
+private:
     struct Slices
     {
         IplImage* original_rgb = nullptr;
@@ -32,6 +33,7 @@ public:
         IplImage* r_plane = nullptr;
         IplImage* g_plane = nullptr;
         IplImage* b_plane = nullptr;
+        static const std::list<const char *> &slices_names();
     } m_slices;
 
 private:

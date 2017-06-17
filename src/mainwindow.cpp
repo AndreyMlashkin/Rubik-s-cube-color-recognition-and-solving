@@ -226,20 +226,19 @@ void MainWindow::fillRbgSlices(IplImage *source_image)
 
 void MainWindow::showSlices()
 {
-    const int pic_count = 4;
     const int width = m_screenSize.width() / 4;
-    const int height = m_screenSize.height() / 2;
+    const int height = m_screenSize.height() / 2;   
 
-    QStringList pic_names {"original", "R", "G", "B"};
+    auto pic_names = Slices::slices_names();
 
-    for(const QString& name : pic_names)
-        cvNamedWindow(name.toStdString().c_str(), WINDOW_NORMAL);
+//    QStringList pic_names {"original", "R", "G", "B"};
 
-    for(int i = 0; i < pic_names.size(); ++i)
-    {
-        const QString& name = pic_names.at(i);
-        cvMoveWindow(name.toStdString().c_str(), i * width, 0);
-    }
+    for(const char *name : pic_names)
+        cvNamedWindow(name, WINDOW_NORMAL);
+
+    int i = 0;
+    for(const char *name : pic_names)
+        cvMoveWindow(name, i++ * width, 0);
 
     cvShowImage("original",m_slices.original_rgb);
     cvShowImage( "R",      m_slices.r_plane );
@@ -248,4 +247,10 @@ void MainWindow::showSlices()
 
     for(const QString& name : pic_names)
         cvResizeWindow(name.toStdString().c_str(), width, height);
+}
+
+const std::list<const char *>& MainWindow::Slices::slices_names()
+{
+    static const std::list<const char*> pic_names {"original", "R", "G", "B"};
+    return pic_names;
 }
