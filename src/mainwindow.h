@@ -18,9 +18,6 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void showFullScreenImage(const QFileInfo& _file);
-    void showProcessedImages(const QFileInfo& _file);
-
     void fillRbgSlices(const QFileInfo& _file);
     void fillRbgSlices(IplImage* source_image);
     void fillEdges();
