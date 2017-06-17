@@ -78,6 +78,8 @@ MainWindow::MainWindow(QWidget *parent) :
         //showFullScreenImage(picturesFile);
         //showProcessedImages(picturesFile);
         fillRbgSlices(picturesFile);
+        fillEdges();
+
         showSlices();
     }
 }
@@ -110,8 +112,6 @@ void MainWindow::showProcessedImages(const QFileInfo &_file)
     const char* filename = tmp_filename.c_str();
 
     IplImage* image = 0;
-    IplImage* dst = 0;
-
     image = cvLoadImage(filename,1);
 
     printf("[i] image: %s\n", filename);
@@ -224,6 +224,23 @@ void MainWindow::fillRbgSlices(IplImage *source_image)
 
 }
 
+void MainWindow::fillEdges()
+{
+    int lowThreshold   = 100;
+    int thresholdRatio = 3;
+
+//    IplImage* tmpEdges = cvCreateImage(cvGetSize(m_slices.original_rgb), IPL_DEPTH_8U, 1);
+    cvCanny(m_slices.r_plane, m_slices.r_plane, lowThreshold, thresholdRatio * lowThreshold);
+    cvCanny(m_slices.b_plane, m_slices.b_plane, lowThreshold, thresholdRatio * lowThreshold);
+    cvCanny(m_slices.g_plane, m_slices.g_plane, lowThreshold, thresholdRatio * lowThreshold);
+
+    Mat edges   = cvarrToMat(m_slices.r_plane);
+    edges += cvarrToMat(m_slices.b_plane);
+    edges += cvarrToMat(m_slices.g_plane);
+
+    m_slices.edges = new IplImage(edges);
+}
+
 void MainWindow::showSlices()
 {
     auto pic_names = Slices::slices_names();
@@ -252,13 +269,27 @@ void MainWindow::showSlices()
 MainWindow::Slices::Slices()
 {}
 
+MainWindow::Slices::~Slices()
+{
+    clear();
+}
+
+void MainWindow::Slices::clear()
+{
+    delete original_rgb;    original_rgb = nullptr;
+    delete r_plane;         r_plane      = nullptr;
+    delete g_plane;         g_plane      = nullptr;
+    delete b_plane;         b_plane      = nullptr;
+    delete edges;           edges        = nullptr;
+}
+
 const std::list<const char *>& MainWindow::Slices::slices_names()
 {
-    static const std::list<const char*> pic_names {"original", "R", "G", "B"};
+    static const std::list<const char*> pic_names {"original", "R", "G", "B", "edges"};
     return pic_names;
 }
 
 const std::list<IplImage *> MainWindow::Slices::slices()
 {
-    return std::list<IplImage *> {original_rgb, r_plane, g_plane, b_plane};
+    return std::list<IplImage *> {original_rgb, r_plane, g_plane, b_plane, edges};
 }
