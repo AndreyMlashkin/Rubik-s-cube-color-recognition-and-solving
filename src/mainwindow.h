@@ -38,7 +38,10 @@ private:
         ~Slices();
         void clear();
 
-        static const std::list<const char *> &slices_names();
+        int rows() { return slicesNames().size() / cols(); }
+        int cols() { return 4; }
+
+        static const std::list<const char *> &slicesNames();
         const std::list<IplImage*> slices();
 
         IplImage* original_rgb = nullptr;

@@ -77,7 +77,7 @@ void MainWindow::findConturs()
 
     /// Draw contours
     Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
-    for( int i = 0; i< contours.size(); i++ )
+    for(uint i = 0; i< contours.size(); i++ )
        {
          Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
          drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
@@ -90,16 +90,21 @@ void MainWindow::findConturs()
 
 void MainWindow::showSlices()
 {
-    auto pic_names = Slices::slices_names();
-    const int width = m_screenSize.width() / pic_names.size();
-    const int height = m_screenSize.height() / 2;   
+    auto pic_names = Slices::slicesNames();
+    const int width = m_screenSize.width() / m_slices.cols();
+    const int height = m_screenSize.height() / 2;
 
     for(const char *name : pic_names)
         cvNamedWindow(name, WINDOW_NORMAL);
 
     int i = 0;
     for(const char *name : pic_names)
-        cvMoveWindow(name, i++ * width, 0);
+    {
+        int rowIndex    = i / m_slices.cols();
+        int columnIndex = i % m_slices.cols();
+        cvMoveWindow(name, width * columnIndex, height * rowIndex);
+        ++i;
+    }
 
     const std::list<IplImage *> slices = m_slices.slices();
     auto picIter = slices.begin();
@@ -165,7 +170,7 @@ void MainWindow::Slices::clear()
     if(edges       ) cvReleaseImage(&edges       );   edges        = nullptr;
 }
 
-const std::list<const char *>& MainWindow::Slices::slices_names()
+const std::list<const char *>& MainWindow::Slices::slicesNames()
 {
     static const std::list<const char*> pic_names {"original", "R", "G", "B", "edges"};
     return pic_names;
