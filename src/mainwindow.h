@@ -16,7 +16,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow();       
 
     void fillRbgSlices(const QFileInfo& _file);
     void fillRbgSlices(IplImage* source_image);
@@ -24,7 +24,13 @@ public:
 
     void showSlices();
 
+public slots:
+    void updateThreshold(int _newThreshold);
+    void loadFromFile();
+
 private:
+    void clear();
+
     struct Slices
     {
         Slices();
@@ -46,6 +52,7 @@ private:
 private:
     Ui::MainWindow *ui;
     QSize m_screenSize;
+    int m_threshold = 50;
 };
 
 #endif // MAINWINDOW_H

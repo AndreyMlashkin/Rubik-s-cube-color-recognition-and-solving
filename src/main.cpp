@@ -9,7 +9,5 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
-    int result = a.exec();
-    cvDestroyAllWindows();
-    return result;
+    return a.exec();
 }

@@ -17,23 +17,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     m_screenSize = QApplication::desktop()->screenGeometry().size();
 
-    QDir dir = QDir::current();
-    Q_ASSERT(dir.cdUp());
-    Q_ASSERT(dir.cd("bin"));
-
-    qDebug() << dir.absolutePath();
-    const QFileInfoList picturesFiles = dir.entryInfoList(QStringList {"*.jpg"}, QDir::Files | QDir::Readable);
-    for(const QFileInfo& picturesFile : picturesFiles)
-    {
-        fillRbgSlices(picturesFile);
-        fillEdges();
-
-        showSlices();
-    }
+    connect(ui->m_spinBox, SIGNAL(valueChanged(int)), SLOT(updateThreshold(int)));
+    loadFromFile();
 }
 
 MainWindow::~MainWindow()
 {
+    clear();
     delete ui;
 }
 
@@ -61,13 +51,11 @@ void MainWindow::fillRbgSlices(IplImage *source_image)
 
 void MainWindow::fillEdges()
 {
-    int lowThreshold   = 100;
     int thresholdRatio = 3;
 
-//    IplImage* tmpEdges = cvCreateImage(cvGetSize(m_slices.original_rgb), IPL_DEPTH_8U, 1);
-    cvCanny(m_slices.r_plane, m_slices.r_plane, lowThreshold, thresholdRatio * lowThreshold);
-    cvCanny(m_slices.b_plane, m_slices.b_plane, lowThreshold, thresholdRatio * lowThreshold);
-    cvCanny(m_slices.g_plane, m_slices.g_plane, lowThreshold, thresholdRatio * lowThreshold);
+    cvCanny(m_slices.r_plane, m_slices.r_plane, m_threshold, thresholdRatio * m_threshold);
+    cvCanny(m_slices.b_plane, m_slices.b_plane, m_threshold, thresholdRatio * m_threshold);
+    cvCanny(m_slices.g_plane, m_slices.g_plane, m_threshold, thresholdRatio * m_threshold);
 
     Mat edges   = cvarrToMat(m_slices.r_plane);
     edges += cvarrToMat(m_slices.b_plane);
@@ -89,9 +77,11 @@ void MainWindow::showSlices()
     for(const char *name : pic_names)
         cvMoveWindow(name, i++ * width, 0);
 
-    auto picIter = m_slices.slices().begin();
+    const std::list<IplImage *> slices = m_slices.slices();
+    auto picIter = slices.begin();
     for(const char *name : pic_names)
     {
+        Q_ASSERT(picIter != slices.end());
         IplImage* img = *picIter;
         cvShowImage(name, img);
         ++picIter;
@@ -99,6 +89,38 @@ void MainWindow::showSlices()
 
     for(const QString& name : pic_names)
         cvResizeWindow(name.toStdString().c_str(), width, height);
+}
+
+void MainWindow::updateThreshold(int _newThreshold)
+{
+    m_threshold = _newThreshold;
+    loadFromFile();
+}
+
+void MainWindow::loadFromFile()
+{
+    clear();
+    m_slices.clear();
+
+    QDir dir = QDir::current();
+    Q_ASSERT(dir.cdUp());
+    Q_ASSERT(dir.cd("bin"));
+
+    qDebug() << dir.absolutePath();
+    const QFileInfoList picturesFiles = dir.entryInfoList(QStringList {"*.jpg"}, QDir::Files | QDir::Readable);
+    for(const QFileInfo& picturesFile : picturesFiles)
+    {
+        fillRbgSlices(picturesFile);
+        //fillEdges(); // TODO uncomment
+
+        showSlices();
+    }
+}
+
+void MainWindow::clear()
+{
+    cvDestroyAllWindows();
+    m_slices.clear();
 }
 
 MainWindow::Slices::Slices()
@@ -111,11 +133,11 @@ MainWindow::Slices::~Slices()
 
 void MainWindow::Slices::clear()
 {
-    delete original_rgb;    original_rgb = nullptr;
-    delete r_plane;         r_plane      = nullptr;
-    delete g_plane;         g_plane      = nullptr;
-    delete b_plane;         b_plane      = nullptr;
-    delete edges;           edges        = nullptr;
+    cvReleaseImage(&original_rgb);   original_rgb = nullptr;
+    cvReleaseImage(&r_plane)     ;   r_plane      = nullptr;
+    cvReleaseImage(&g_plane)     ;   g_plane      = nullptr;
+    cvReleaseImage(&b_plane)     ;   b_plane      = nullptr;
+    cvReleaseImage(&edges)       ;   edges        = nullptr;
 }
 
 const std::list<const char *>& MainWindow::Slices::slices_names()
