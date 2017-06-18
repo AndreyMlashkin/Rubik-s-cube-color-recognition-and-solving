@@ -60,6 +60,8 @@ void MainWindow::fillEdges()
     m_slices.edges = cvCreateImage(cvGetSize(m_slices.original_rgb), IPL_DEPTH_8U, 1);
     cvAdd(m_slices.r_plane, m_slices.b_plane, m_slices.edges);
     cvAdd(m_slices.edges,   m_slices.g_plane, m_slices.edges);
+
+    cvSmooth(m_slices.edges, m_slices.edges);
 }
 
 void MainWindow::showSlices()
