@@ -57,9 +57,9 @@ void MainWindow::fillEdges()
     cvCanny(m_slices.b_plane, m_slices.b_plane, m_threshold, thresholdRatio * m_threshold);
     cvCanny(m_slices.g_plane, m_slices.g_plane, m_threshold, thresholdRatio * m_threshold);
 
-    Mat edges   = cvarrToMat(m_slices.r_plane);
-    edges += cvarrToMat(m_slices.b_plane);
-    edges += cvarrToMat(m_slices.g_plane);
+    Mat edges  = cvarrToMat(m_slices.r_plane);
+    edges     += cvarrToMat(m_slices.b_plane);
+    edges     += cvarrToMat(m_slices.g_plane);
 
     m_slices.edges = new IplImage(edges);
 }
@@ -99,7 +99,7 @@ void MainWindow::updateThreshold(int _newThreshold)
 
 void MainWindow::loadFromFile()
 {
-    clear();
+//    clear();
     m_slices.clear();
 
     QDir dir = QDir::current();
@@ -111,7 +111,7 @@ void MainWindow::loadFromFile()
     for(const QFileInfo& picturesFile : picturesFiles)
     {
         fillRbgSlices(picturesFile);
-        //fillEdges(); // TODO uncomment
+        fillEdges();
 
         showSlices();
     }
@@ -133,11 +133,11 @@ MainWindow::Slices::~Slices()
 
 void MainWindow::Slices::clear()
 {
-    cvReleaseImage(&original_rgb);   original_rgb = nullptr;
-    cvReleaseImage(&r_plane)     ;   r_plane      = nullptr;
-    cvReleaseImage(&g_plane)     ;   g_plane      = nullptr;
-    cvReleaseImage(&b_plane)     ;   b_plane      = nullptr;
-    cvReleaseImage(&edges)       ;   edges        = nullptr;
+    if(original_rgb) cvReleaseImage(&original_rgb);   original_rgb = nullptr;
+    if(r_plane     ) cvReleaseImage(&r_plane     );   r_plane      = nullptr;
+    if(g_plane     ) cvReleaseImage(&g_plane     );   g_plane      = nullptr;
+    if(b_plane     ) cvReleaseImage(&b_plane     );   b_plane      = nullptr;
+    //if(edges       ) cvReleaseImage(&edges       );   edges        = nullptr;
 }
 
 const std::list<const char *>& MainWindow::Slices::slices_names()
