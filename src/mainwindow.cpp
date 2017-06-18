@@ -78,14 +78,14 @@ void MainWindow::findConturs()
     /// Draw contours
     Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
     for(uint i = 0; i< contours.size(); i++ )
-       {
-         Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-         drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
-       }
-
+    {
+        Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+        drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
+    }
     /// Show in a window
-    namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
+    namedWindow( "Contours", CV_WINDOW_NORMAL );
     imshow( "Contours", drawing );
+    cvResizeWindow("Contours", 100, 100);
 }
 
 void MainWindow::showSlices()
@@ -116,8 +116,8 @@ void MainWindow::showSlices()
         ++picIter;
     }
 
-    for(const QString& name : pic_names)
-        cvResizeWindow(name.toStdString().c_str(), width, height);
+    for(const char* name : pic_names)
+        cvResizeWindow(name, width, height);
 }
 
 void MainWindow::updateThreshold(int _newThreshold)
@@ -172,11 +172,11 @@ void MainWindow::Slices::clear()
 
 const std::list<const char *>& MainWindow::Slices::slicesNames()
 {
-    static const std::list<const char*> pic_names {"original", "R", "G", "B", "edges"};
+    static const std::list<const char*> pic_names {"original", "R", "G", "B", "edges", "borders"};
     return pic_names;
 }
 
 const std::list<IplImage *> MainWindow::Slices::slices()
 {
-    return std::list<IplImage *> {original_rgb, r_plane, g_plane, b_plane, edges};
+    return std::list<IplImage *> {original_rgb, r_plane, g_plane, b_plane, edges, borders};
 }

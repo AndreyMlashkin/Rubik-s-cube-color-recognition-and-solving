@@ -50,7 +50,8 @@ private:
         IplImage* g_plane = nullptr;
         IplImage* b_plane = nullptr;
 
-        IplImage* edges = nullptr;
+        IplImage* edges   = nullptr;
+        IplImage* borders = nullptr;
     } m_slices;
 
 private:
