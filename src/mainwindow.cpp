@@ -9,6 +9,7 @@
 #include <opencv2/imgproc.hpp>
 
 using namespace cv;
+using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -64,6 +65,29 @@ void MainWindow::fillEdges()
     cvSmooth(m_slices.edges, m_slices.edges);
 }
 
+void MainWindow::findConturs()
+{
+    RNG rng(12345);
+
+    Mat canny_output = cvarrToMat(m_slices.edges);
+
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+    findContours(canny_output, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
+
+    /// Draw contours
+    Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
+    for( int i = 0; i< contours.size(); i++ )
+       {
+         Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+         drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
+       }
+
+    /// Show in a window
+    namedWindow( "Contours", CV_WINDOW_AUTOSIZE );
+    imshow( "Contours", drawing );
+}
+
 void MainWindow::showSlices()
 {
     auto pic_names = Slices::slices_names();
@@ -112,6 +136,7 @@ void MainWindow::loadFromFile()
     {
         fillRbgSlices(picturesFile);
         fillEdges();
+        findConturs();
 
         showSlices();
     }

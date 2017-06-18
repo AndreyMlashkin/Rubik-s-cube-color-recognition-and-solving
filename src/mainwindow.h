@@ -21,6 +21,7 @@ public:
     void fillRbgSlices(const QFileInfo& _file);
     void fillRbgSlices(IplImage* source_image);
     void fillEdges();
+    void findConturs();
 
     void showSlices();
 
