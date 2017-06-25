@@ -67,7 +67,6 @@ void MainWindow::fillEdges()
 
 void MainWindow::findConturs()
 {
-
     Mat canny_output = cvarrToMat(m_slices.edges);
 
     vector<vector<Point> > contours;
@@ -92,19 +91,22 @@ void MainWindow::findConturs()
     // ----------------------
 
     vector<vector<Point> > rectangleContours;
+    vector<double> lengths, areas;
     for(uint i = 0; i< aproximatedContours.size(); ++i)
     {
         const vector<Point>& contur = aproximatedContours[i];
-        if(contur.size() < 4)
+        if(contur.size() < 4 || contur.size() > 8)
             continue;
 
         double length = arcLength(contur, true);
         double area = contourArea(contur, false);
-        double tolerance = length / 1024;
+        double tolerance = length / 4048;
 
-        if(length - 2 * area < tolerance)
+        if((length - 2 * area) < tolerance)
         {
             rectangleContours.push_back(contur);
+            lengths.push_back(length);
+            areas.push_back(area);
         }
     }
 
@@ -113,6 +115,9 @@ void MainWindow::findConturs()
 
     Mat rectanglesDrawing = drawConturs(rectangleContours, true);
     showMat(rectanglesDrawing, "Rectangles");
+
+    qDebug() << "lengths: " << lengths;
+    qDebug() << "areas: " << areas;
 }
 
 void MainWindow::showSlices()
