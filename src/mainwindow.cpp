@@ -78,15 +78,16 @@ void MainWindow::findConturs()
     showMat(drawing, "Contours");
 
     //--------- Apriximation:
-    Mat drawingAprox = Mat::zeros( canny_output.size(), CV_8UC3 );
     vector<vector<Point>> aproximatedContours;
     for(uint i = 0; i< contours.size(); ++i)
     {
+        double ACCURACY = 10;
         vector<Point> approximatedContur;
-        approxPolyDP(Mat(contours[i]), approximatedContur, arcLength(Mat(contours[i]), true)*0.02, true);
+        approxPolyDP(Mat(contours[i]), approximatedContur, ACCURACY, true);
         aproximatedContours.push_back(approximatedContur);
-        drawContours(drawingAprox, contours, i, Scalar(255, 0, 0), 2, 8, hierarchy, 0, Point() );
     }
+
+    Mat drawingAprox = drawConturs(aproximatedContours);
     showMat(drawingAprox, "Aproximated");
     // ----------------------
 
@@ -110,13 +111,8 @@ void MainWindow::findConturs()
     if(rectangleContours.size() == 0)
         return;
 
-    Mat rectangles = Mat::zeros( canny_output.size(), CV_8UC3 );
-    for(uint i = 0; i< rectangleContours.size(); ++i)
-    {
-        drawContours(rectangles, rectangleContours, i, Scalar(255, 0, 0), 2, 8, hierarchy, 0, Point());
-    }
-
-    showMat(rectangles, "Rectangles");
+    Mat rectanglesDrawing = drawConturs(rectangleContours, true);
+    showMat(rectanglesDrawing, "Rectangles");
 }
 
 void MainWindow::showSlices()
@@ -244,11 +240,11 @@ void MainWindow::Slices::clear()
 
 const std::list<const char *>& MainWindow::Slices::slicesNames()
 {
-    static const std::list<const char*> pic_names {"original", "R", "G", "B", "edges", "borders"};
+    static const std::list<const char*> pic_names {"original", "R", "G", "B", "edges"};
     return pic_names;
 }
 
 const std::list<IplImage *> MainWindow::Slices::slices()
 {
-    return std::list<IplImage *> {original_rgb, r_plane, g_plane, b_plane, edges, borders};
+    return std::list<IplImage *> {original_rgb, r_plane, g_plane, b_plane, edges};
 }
