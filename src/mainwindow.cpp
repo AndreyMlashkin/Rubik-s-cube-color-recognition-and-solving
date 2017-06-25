@@ -203,10 +203,10 @@ void MainWindow::loadFromFile()
     Q_ASSERT(dir.cdUp());
     Q_ASSERT(dir.cd("bin"));
 
-    qDebug() << dir.absolutePath();
     const QFileInfoList picturesFiles = dir.entryInfoList(QStringList {"*.jpg"}, QDir::Files | QDir::Readable);
     for(const QFileInfo& picturesFile : picturesFiles)
     {
+        qDebug() << picturesFile.fileName();
         fillRbgSlices(picturesFile);
         fillEdges();
         findConturs();
