@@ -25,6 +25,10 @@ public:
 
     void showSlices();
 
+    void showMat(const cv::Mat& _mat, const char *_windowName) const;
+
+    static void logContur(const std::vector<cv::Point>& _contur);
+
 public slots:
     void updateThreshold(int _newThreshold);
     void loadFromFile();
@@ -38,8 +42,8 @@ private:
         ~Slices();
         void clear();
 
-        int rows() { return slicesNames().size() / cols(); }
-        int cols() { return 4; }
+        int rows() const { return slicesNames().size() / cols(); }
+        int cols() const { return 4; }
 
         static const std::list<const char *> &slicesNames();
         const std::list<IplImage*> slices();

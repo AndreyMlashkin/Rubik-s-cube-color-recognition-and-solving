@@ -82,10 +82,50 @@ void MainWindow::findConturs()
         Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
         drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
     }
-    /// Show in a window
     namedWindow( "Contours", CV_WINDOW_NORMAL );
     imshow( "Contours", drawing );
     cvResizeWindow("Contours", 100, 100);
+
+    //--------- Apriximation:
+    Mat drawingAprox = Mat::zeros( canny_output.size(), CV_8UC3 );
+    vector<vector<Point> > aproximatedContours;
+    for(uint i = 0; i< contours.size(); ++i)
+    {
+        vector<Point> approximatedContur;
+        approxPolyDP(Mat(contours[i]), approximatedContur, arcLength(Mat(contours[i]), true)*0.02, true);
+        aproximatedContours.push_back(approximatedContur);
+        drawContours(drawingAprox, contours, i, Scalar(255, 0, 0), 2, 8, hierarchy, 0, Point() );
+    }
+    showMat(drawingAprox, "Aproximated");
+    // ----------------------
+
+    vector<vector<Point> > rectangleContours;
+    for(uint i = 0; i< aproximatedContours.size(); ++i)
+    {
+        const vector<Point>& contur = aproximatedContours[i];
+        if(contur.size() < 4)
+            continue;
+
+        double length = arcLength(contur, true);
+        double area = contourArea(contur, false);
+        double tolerance = length / 1024;
+
+        if(length - 2 * area < tolerance)
+        {
+            rectangleContours.push_back(contur);
+        }
+    }
+
+    if(rectangleContours.size() == 0)
+        return;
+
+    Mat rectangles = Mat::zeros( canny_output.size(), CV_8UC3 );
+    for(uint i = 0; i< rectangleContours.size(); ++i)
+    {
+        drawContours(rectangles, rectangleContours, i, Scalar(255, 0, 0), 2, 8, hierarchy, 0, Point());
+    }
+
+    showMat(rectangles, "Rectangles");
 }
 
 void MainWindow::showSlices()
@@ -118,6 +158,27 @@ void MainWindow::showSlices()
 
     for(const char* name : pic_names)
         cvResizeWindow(name, width, height);
+}
+
+void MainWindow::showMat(const Mat &_mat, const char* _windowName) const
+{
+    const int width = m_screenSize.width() / m_slices.cols();
+    const int height = m_screenSize.height() / 2;
+
+    namedWindow(_windowName, CV_WINDOW_NORMAL );
+    imshow(_windowName, _mat);
+    cvResizeWindow(_windowName, width, height);
+}
+
+void MainWindow::logContur(const vector<Point> &_contur)
+{
+    qDebug() << "==contur:==";
+    for(const Point& point : _contur)
+    {
+        qDebug() << QString("[%1, %2]\n")
+                    .arg(point.x)
+                    .arg(point.y);
+    }
 }
 
 void MainWindow::updateThreshold(int _newThreshold)
