@@ -24,8 +24,8 @@ public:
     void findConturs();
 
     void showSlices();
-
     void showMat(const cv::Mat& _mat, const char *_windowName) const;
+    cv::Mat drawConturs(std::vector<std::vector<cv::Point>> _contours, bool _randomColors = false);
 
     static void logContur(const std::vector<cv::Point>& _contur);
 
@@ -57,6 +57,9 @@ private:
         IplImage* edges   = nullptr;
         IplImage* borders = nullptr;
     } m_slices;
+
+private:
+    cv::Size pictureSize() const;
 
 private:
     Ui::MainWindow *ui;

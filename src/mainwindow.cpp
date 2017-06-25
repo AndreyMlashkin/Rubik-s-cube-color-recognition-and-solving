@@ -67,7 +67,6 @@ void MainWindow::fillEdges()
 
 void MainWindow::findConturs()
 {
-    RNG rng(12345);
 
     Mat canny_output = cvarrToMat(m_slices.edges);
 
@@ -75,20 +74,12 @@ void MainWindow::findConturs()
     vector<Vec4i> hierarchy;
     findContours(canny_output, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
-    /// Draw contours
-    Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
-    for(uint i = 0; i< contours.size(); i++ )
-    {
-        Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-        drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
-    }
-    namedWindow( "Contours", CV_WINDOW_NORMAL );
-    imshow( "Contours", drawing );
-    cvResizeWindow("Contours", 100, 100);
+    Mat drawing = drawConturs(contours, true);
+    showMat(drawing, "Contours");
 
     //--------- Apriximation:
     Mat drawingAprox = Mat::zeros( canny_output.size(), CV_8UC3 );
-    vector<vector<Point> > aproximatedContours;
+    vector<vector<Point>> aproximatedContours;
     for(uint i = 0; i< contours.size(); ++i)
     {
         vector<Point> approximatedContur;
@@ -170,6 +161,21 @@ void MainWindow::showMat(const Mat &_mat, const char* _windowName) const
     cvResizeWindow(_windowName, width, height);
 }
 
+Mat MainWindow::drawConturs(std::vector<std::vector<Point> > _contours, bool _randomColors)
+{
+    RNG rng(12345);
+
+    Mat drawing = Mat::zeros(pictureSize(), CV_8UC3 );
+    for(uint i = 0; i< _contours.size(); i++ )
+    {
+        Scalar color = _randomColors?
+                    Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) ) :
+                    Scalar(255, 0, 0);
+        drawContours( drawing, _contours, i, color, 2, 8);
+    }
+    return drawing;
+}
+
 void MainWindow::logContur(const vector<Point> &_contur)
 {
     qDebug() << "==contur:==";
@@ -212,6 +218,11 @@ void MainWindow::clear()
 {
     cvDestroyAllWindows();
     m_slices.clear();
+}
+
+Size MainWindow::pictureSize() const
+{
+    return Size(m_slices.original_rgb->width, m_slices.original_rgb->height);
 }
 
 MainWindow::Slices::Slices()
