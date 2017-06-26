@@ -11,6 +11,14 @@
 using namespace cv;
 using namespace std;
 
+double mean(std::vector<double> _values)
+{
+    double res = 0;
+    for(const& val : _values)
+        res += val;
+    res /= _values.size();
+}
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -72,6 +80,8 @@ void MainWindow::findColorsOfConturs()
     vector<vector<Point>> rectangleContours = filterConturs(aproximatedContours);
 
     std::vector<Scalar> colors = findColorOfShapes(rectangleContours);
+    Q_ASSERT(rectangleContours.size() == colors.size());
+
 
 }
 
@@ -132,11 +142,34 @@ std::vector<std::vector<Point> > MainWindow::filterConturs(std::vector<std::vect
         return rectangleContours;
     }
 
+    qDebug() << "lengths: " << lengths;
+    qDebug() << "areas: " << areas;
+    qDebug() << "shapes found: " << areas.size();
+
+//    while(rectangleContours.size() > 27)
+//    {
+//        Q_ASSERT(areas.size() == rectangleContours.size());
+//        double arMean = mean(areas);
+
+//        int fluctuationAbs = 0;
+//        int fluctuationIndex = 0;
+//        for(int i = 0; i < areas.size(); ++i)
+//        {
+//            double fluctuationValue = fabs(areas[i] - arMean);
+//            if( fluctuationValue > fluctuationAbs)
+//            {
+//                fluctuationAbs = fluctuationValue;
+//                fluctuationIndex = i;
+//            }
+//        }
+
+//        rectangleContours.erase(rectangleContours.begin() + fluctuationIndex);
+//        areas.erase(areas.begin() + fluctuationIndex);
+//    }
+
     Mat rectanglesDrawing = drawConturs(rectangleContours, true);
     showMat(rectanglesDrawing, "Rectangles");
 
-    qDebug() << "lengths: " << lengths;
-    qDebug() << "areas: " << areas;
     return rectangleContours;
 }
 
