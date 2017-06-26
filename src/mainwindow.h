@@ -21,7 +21,6 @@ public:
     void fillRbgSlices(const QFileInfo& _file);
     void fillRbgSlices(IplImage* source_image);
     void fillEdges();
-    void findConturs();
 
     void showSlices();
     void showMat(const cv::Mat& _mat, const char *_windowName) const;
@@ -34,6 +33,12 @@ public slots:
     void loadFromFile();
 
 private:
+    void findColorsOfConturs();
+    std::vector<std::vector<cv::Point>> findConturs();
+    std::vector<std::vector<cv::Point> > aproximateConturs(std::vector<std::vector<cv::Point>> &_contours);
+    std::vector<std::vector<cv::Point> > filterConturs(std::vector<std::vector<cv::Point>> &_counturs);
+
+
     void clear();
 
     struct Slices

@@ -65,7 +65,15 @@ void MainWindow::fillEdges()
     cvSmooth(m_slices.edges, m_slices.edges);
 }
 
-void MainWindow::findConturs()
+void MainWindow::findColorsOfConturs()
+{
+    vector<vector<Point>> contours = findConturs();
+    vector<vector<Point>> aproximatedContours = aproximateConturs(contours);
+    vector<vector<Point>> rectangleContours = filterConturs(aproximatedContours);
+
+}
+
+std::vector<std::vector<Point> > MainWindow::findConturs()
 {
     Mat canny_output = cvarrToMat(m_slices.edges);
 
@@ -75,26 +83,32 @@ void MainWindow::findConturs()
 
     Mat drawing = drawConturs(contours, true);
     showMat(drawing, "Contours");
+    return contours;
+}
 
-    //--------- Apriximation:
+std::vector<std::vector<Point> > MainWindow::aproximateConturs(std::vector<std::vector<Point> > &_contours)
+{
     vector<vector<Point>> aproximatedContours;
-    for(uint i = 0; i< contours.size(); ++i)
+    for(uint i = 0; i< _contours.size(); ++i)
     {
         double ACCURACY = 10;
         vector<Point> approximatedContur;
-        approxPolyDP(Mat(contours[i]), approximatedContur, ACCURACY, true);
+        approxPolyDP(Mat(_contours[i]), approximatedContur, ACCURACY, true);
         aproximatedContours.push_back(approximatedContur);
     }
 
     Mat drawingAprox = drawConturs(aproximatedContours);
     showMat(drawingAprox, "Aproximated");
-    // ----------------------
+    return aproximatedContours;
+}
 
+std::vector<std::vector<Point> > MainWindow::filterConturs(std::vector<std::vector<Point> >& _counturs)
+{
     vector<vector<Point> > rectangleContours;
     vector<double> lengths, areas;
-    for(uint i = 0; i< aproximatedContours.size(); ++i)
+    for(uint i = 0; i< _counturs.size(); ++i)
     {
-        const vector<Point>& contur = aproximatedContours[i];
+        const vector<Point>& contur = _counturs[i];
         if(contur.size() < 4 || contur.size() > 8)
             continue;
 
@@ -111,13 +125,17 @@ void MainWindow::findConturs()
     }
 
     if(rectangleContours.size() == 0)
-        return;
+    {
+        qWarning() << "no rectangles found!";
+        return rectangleContours;
+    }
 
     Mat rectanglesDrawing = drawConturs(rectangleContours, true);
     showMat(rectanglesDrawing, "Rectangles");
 
     qDebug() << "lengths: " << lengths;
     qDebug() << "areas: " << areas;
+    return rectangleContours;
 }
 
 void MainWindow::showSlices()
@@ -209,7 +227,7 @@ void MainWindow::loadFromFile()
         qDebug() << picturesFile.fileName();
         fillRbgSlices(picturesFile);
         fillEdges();
-        findConturs();
+        findColorsOfConturs();
 
         showSlices();
     }
