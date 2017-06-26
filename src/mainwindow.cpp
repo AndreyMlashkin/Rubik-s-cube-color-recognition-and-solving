@@ -71,6 +71,8 @@ void MainWindow::findColorsOfConturs()
     vector<vector<Point>> aproximatedContours = aproximateConturs(contours);
     vector<vector<Point>> rectangleContours = filterConturs(aproximatedContours);
 
+    std::vector<Scalar> colors = findColorOfShapes(rectangleContours);
+
 }
 
 std::vector<std::vector<Point> > MainWindow::findConturs()
@@ -136,6 +138,30 @@ std::vector<std::vector<Point> > MainWindow::filterConturs(std::vector<std::vect
     qDebug() << "lengths: " << lengths;
     qDebug() << "areas: " << areas;
     return rectangleContours;
+}
+
+std::vector<Scalar> MainWindow::findColorOfShapes(std::vector<std::vector<Point> > &_contours)
+{
+    Mat src = cvarrToMat(m_slices.original_rgb);
+    Mat colored = Mat::zeros(pictureSize(), CV_8UC3 );
+
+    Mat src_gray;
+    cvtColor( src, src_gray, COLOR_BGR2GRAY );
+    threshold( src_gray, src_gray, 50, 255, THRESH_BINARY );
+
+    std::vector<Scalar> colors;
+
+    for( size_t i = 0; i< _contours.size(); i++ )
+    {
+        Rect rect = boundingRect( _contours[i] );
+        Scalar meanColor = mean( src( rect ), src_gray( rect ) );
+        colors.push_back(meanColor);
+
+        drawContours( colored, _contours, (int)i, meanColor, FILLED );
+    }
+
+    imshow( "colored", colored );
+    return colors;
 }
 
 void MainWindow::showSlices()

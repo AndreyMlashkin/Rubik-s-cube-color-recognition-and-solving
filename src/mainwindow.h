@@ -37,7 +37,7 @@ private:
     std::vector<std::vector<cv::Point>> findConturs();
     std::vector<std::vector<cv::Point> > aproximateConturs(std::vector<std::vector<cv::Point>> &_contours);
     std::vector<std::vector<cv::Point> > filterConturs(std::vector<std::vector<cv::Point>> &_counturs);
-
+    std::vector<cv::Scalar> findColorOfShapes(std::vector<std::vector<cv::Point>> &_counturs);
 
     void clear();
 
