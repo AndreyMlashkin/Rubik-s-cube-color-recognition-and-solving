@@ -16,7 +16,7 @@ double mean(std::vector<double> _values)
     double res = 0;
     for(const& val : _values)
         res += val;
-    res /= _values.size();
+    return res /= _values.size();
 }
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -146,26 +146,26 @@ std::vector<std::vector<Point> > MainWindow::filterConturs(std::vector<std::vect
     qDebug() << "areas: " << areas;
     qDebug() << "shapes found: " << areas.size();
 
-//    while(rectangleContours.size() > 27)
-//    {
-//        Q_ASSERT(areas.size() == rectangleContours.size());
-//        double arMean = mean(areas);
+    while(rectangleContours.size() > 27)
+    {
+        Q_ASSERT(areas.size() == rectangleContours.size());
+        double arMean = mean(areas);
 
-//        int fluctuationAbs = 0;
-//        int fluctuationIndex = 0;
-//        for(int i = 0; i < areas.size(); ++i)
-//        {
-//            double fluctuationValue = fabs(areas[i] - arMean);
-//            if( fluctuationValue > fluctuationAbs)
-//            {
-//                fluctuationAbs = fluctuationValue;
-//                fluctuationIndex = i;
-//            }
-//        }
+        int fluctuationAbs = 0;
+        int fluctuationIndex = 0;
+        for(uint i = 0; i < areas.size(); ++i)
+        {
+            double fluctuationValue = fabs(areas[i] - arMean);
+            if( fluctuationValue > fluctuationAbs)
+            {
+                fluctuationAbs = fluctuationValue;
+                fluctuationIndex = i;
+            }
+        }
 
-//        rectangleContours.erase(rectangleContours.begin() + fluctuationIndex);
-//        areas.erase(areas.begin() + fluctuationIndex);
-//    }
+        rectangleContours.erase(rectangleContours.begin() + fluctuationIndex);
+        areas.erase(areas.begin() + fluctuationIndex);
+    }
 
     Mat rectanglesDrawing = drawConturs(rectangleContours, true);
     showMat(rectanglesDrawing, "Rectangles");
